@@ -20,12 +20,64 @@
 
     <section class="main-content">
       <h3>
-<a id="background-on-the-competition" class="anchor" href="#background-on-the-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background on the Competition</h3>
+<a id="the-walmart-data-science-competition" class="anchor" href="#the-walmart-data-science-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Walmart Data Science Competition</h3>
 
 <p>Walmart uses art and science to better understand and classify their customers - "art" referring to their extensive expertise in the retail sector and "science" referring to the utilization of one of the  world's largest retail and customer databases. Customer classification can help Walmart better serve their customers in many ways, such as helping them improve store layout, better target promotions through new e-commerce platforms like apps, and analyze buying trends. </p>
 
-<p>As a recruitment competition, Walmart challenged the data science community to recreate their customer classification system using only "science", or hard data on customer transactions, and very limited at that. They provided over 600,000 thousands rows of training data, with each row representing an individual item purchased. A snapshot of the initial dataset is below:
+<p>As a recruitment competition, Walmart challenged the data science community to recreate their customer classification system using only "science", or hard data on customer transactions, and very limited at that. They provided over 600,000 thousands rows of training data, with each row representing an individual item purchased. Here's a snapshot of the initial dataset:
 <img src="https://cloud.githubusercontent.com/assets/14279088/12134928/dddccf70-b3f1-11e5-8966-2b81ed9d0435.png"></p>
+
+<p>You can see that Walmart provides, from left to right:</p>
+
+<ul>
+<li>The designated Walmart Trip Type classification - this is the "answer" that we will train our models on the</li>
+<li>A Visit Number - a unique identifier for a particular trip, with ~90,000 trips in all</li>
+<li>The day of the week</li>
+<li>The UPC (or barcode) number of the item</li>
+<li>The scan count - the number of that particular item purchased, with a return signified as a negative</li>
+<li>A Department Description - 1 of 72 item categories created by Walmart</li>
+<li>A Fineline Number - 1 of 5000 numbers used to further classify items</li>
+</ul>
+
+<p>Right away, I knew an important part of this competition would be to understand what this data means and what story it's telling. That way, I could figure out what story to tell machine learning models through feature generation. </p>
+
+<h3>
+<a id="data-analysis" class="anchor" href="#data-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Analysis</h3>
+
+<p>A great tool to understand numerous categories of data on a single screen is a heat map. I used a heat map to better understand Walmart's 38 trip types, defined by the quantity of the department categories purchased within each. I soon found many correlations.</p>
+
+<p><code>a4_dims = (13, 9)
+fig, ax = plt.subplots(figsize=a4_dims)
+seaborn.heatmap(ax=ax, data=mytestgrouped_categories_norm.T, linecolor='lightgrey', linewidths=.00000000000000001)
+heatmap = ax.pcolor(mytestgrouped_categories_norm, cmap=plt.cm.Blues, alpha=0.8)
+ax.set_xticklabels(mytestgrouped_categories.columns, minor=False)
+ax.set_yticklabels(mytestgrouped_categories_norm.index, minor=False)
+ax.invert_yaxis()
+ax.xaxis.tick_top()
+ax.set_yticks(np.arange(mytestgrouped_categories_norm.shape[1]) + 1, minor=False)
+ax.set_xticks(np.arange(mytestgrouped_categories_norm.shape[0]) + 1, minor=False)
+plt.xticks(rotation=90)
+plt.rc('xtick', labelsize=10)
+plt.title('TripType',y=1.04)</code></p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12152480/3357f490-b472-11e5-8738-3fb0179796f0.png"></p>
+
+<p>I also created bar graphs for each trip type to understand in more detail what was being purchased, for example Trip 4:</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12152516/6d0369fe-b472-11e5-8c62-cccbcbaf3300.png"></p>
+
+<p>I called this one the "Vices" Trip. I then labeled all 38 trips:</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12152574/ac0b0918-b472-11e5-90d9-817d581e7995.png"></p>
+
+<p>Finally, I could tell a story about Walmart's transactional data. The most important aspect of their classification were the types of items purchased, with many trips signifying a trip for a specific cause, from pet food to party items to men's clothes. With this, I then went about creating the features, or columns, that my model would read.</p>
+
+<h3>
+<a id="feature-creation" class="anchor" href="#feature-creation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature Creation</h3>
+
+<p>The data munging for this project was made a little bit complicated by how Walmart presented the data. Machine learning models are typically structured to make predictions or classifications on individual rows in a table. This presented a problem - each row in the Walmart data set represented a <strong>single item</strong>, not a <strong>complete store visit</strong>. As often comes up in data science, I needed to summarize many rows of items data into a single row that would encapsulate the meaning of a particular trip.</p>
+
+<p>I thus created the following features:</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/kaslemr/Walmart_Kaggle_Competition">Walmart Kaggle Competition</a> is maintained by <a href="https://github.com/kaslemr">kaslemr</a>.</span>
