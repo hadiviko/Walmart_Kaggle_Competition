@@ -22,75 +22,222 @@
       <h3>
 <a id="the-walmart-data-science-competition" class="anchor" href="#the-walmart-data-science-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Walmart Data Science Competition</h3>
 
-<p>Walmart uses art and science to better understand and classify their customers - "art" referring to their extensive expertise in the retail sector and "science" referring to the utilization of one of the  world's largest retail and customer databases. Customer classification can help Walmart better serve their customers in many ways, such as helping them improve store layout, better target promotions through new e-commerce platforms like apps, and analyze buying trends. </p>
+<p>Everyone wants to better understand their customers. With the availability of amazing quantities of data from new avenues such as social media as well as traditional avenues such as transactions, it is often difficult to separate the signal from the noise. </p>
 
-<p>As a recruitment competition, Walmart challenged the data science community to recreate their customer classification system using only "science", or hard data on customer transactions, and very limited at that. They provided over 600,000 thousands rows of training data, with each row representing an individual item purchased. Here's a snapshot of the initial dataset:
-<code>data = pd.read_csv("train.csv")
-print(data.head())</code>
-<img src="https://cloud.githubusercontent.com/assets/14279088/12134928/dddccf70-b3f1-11e5-8966-2b81ed9d0435.png"></p>
+<p>How can we extract meaning from so much information?</p>
 
-<p>You can see that Walmart provides, from left to right:</p>
+<p>One way is to use <strong>machine learning</strong>, or predictive analytics. For example, Walmart uses machine learning to classify the different types of trips that people take to their stores. Customer classification can help Walmart improve store layout, better target promotions through apps, or analyze buying trends.</p>
+
+<p>As a recruitment competition on <a href="kaggle.com">Kaggle</a>, <strong>Walmart challenged the data science community to recreate their trip classification system</strong> using only limited transactional data. This could help Walmart innovate and improve upon their machine learning processes.</p>
+
+<p>Walmart provided over 600,000 rows of <strong>training data</strong>, meaning data already labeled with the corresponding trip classification. The challenge would be to train models to predict upon data without the trip classifications, and Walmart graded participants on their accuracy. My models would be able to predict the correct trip classification with 72% accuracy.</p>
+
+<p>Here's a snapshot of the initial dataset:</p>
+
+<pre><code>data = pd.read_csv("train.csv")
+print(data.head())
+</code></pre>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12134928/dddccf70-b3f1-11e5-8966-2b81ed9d0435.png"></p>
 
 <ul>
-<li>The designated Walmart Trip Type classification - this is the "answer" that we will train our models on the</li>
-<li>A Visit Number - a unique identifier for a particular trip, with ~90,000 trips in all</li>
-<li>The day of the week</li>
-<li>The UPC (or barcode) number of the item</li>
-<li>The scan count - the number of that particular item purchased, with a return signified as a negative</li>
-<li>A Department Description - 1 of 72 item categories created by Walmart</li>
-<li>A Fineline Number - 1 of 5000 numbers used to further classify items</li>
+<li>TripType - 1 of 38 different trip classifications created by Walmart, the "answer"</li>
+<li>Visit Number - A unique identifier for a particular trip, with ~90,000 trips in all</li>
+<li>Weekday</li>
+<li>UPC - barcode number </li>
+<li>ScanCount - The number of that particular item purchased, with a return signified as a negative</li>
+<li>Department Description - 1 of 72 item categories created by Walmart</li>
+<li>Fineline Number - 1 of 5000 numbers used to further classify items</li>
 </ul>
 
-<p>Right away, I knew an important part of this competition would be to understand what this data means and what story it's telling. That way, I could figure out what story to tell machine learning models through feature generation. </p>
+<p>When competing in Kaggle competitions or doing any data science project for that matter, it is important to use a structured approach.</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12157673/a5a06a46-b490-11e5-9276-7f90b5625498.png"></p>
+
+<p>Feature preparation refers to the process of transforming raw data into data that machine learning models can read and learn from. You then must run this data through your model, improve performance by optimizing the model's parameters, and finally apply this learned model to test data without classifications. I repeated this process tenfold in optimizing my model's performance.</p>
 
 <h3>
-<a id="data-analysis" class="anchor" href="#data-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Analysis</h3>
+<a id="data-analysis---uncovering-the-mystery-behind-walmarts-trip-classification-strategy" class="anchor" href="#data-analysis---uncovering-the-mystery-behind-walmarts-trip-classification-strategy" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Analysis - Uncovering the Mystery Behind Walmart's Trip Classification Strategy</h3>
 
-<p>A great tool to understand numerous categories of data on a single screen is a heat map. I used a heat map to better understand Walmart's 38 trip types, defined by the quantity of the department categories purchased within each. I soon found many correlations.</p>
+<p>Before beginning this machine learning process, I wanted to gain some basic understanding of Walmart's data, and specifically the Trip Types that we would need to predict upon. It is always easier to create great features when you know have a story you want to tell your model.</p>
 
-<p><code>a4_dims = (13, 9)
+<p>A great tool to understanding many categories of data in a single glance is a heat map.</p>
+
+<pre><code>a4_dims = (13, 9)
 fig, ax = plt.subplots(figsize=a4_dims)
-seaborn.heatmap(ax=ax, data=mytestgrouped_categories_norm.T, linecolor='lightgrey', linewidths=.00000000000000001)
+seaborn.heatmap(ax=ax, data=mytestgrouped_categories_norm.T, linecolor='lightgrey', linewidths=.001)
 heatmap = ax.pcolor(mytestgrouped_categories_norm, cmap=plt.cm.Blues, alpha=0.8)
-ax.set_xticklabels(mytestgrouped_categories.columns, minor=False)
-ax.set_yticklabels(mytestgrouped_categories_norm.index, minor=False)
 ax.invert_yaxis()
 ax.xaxis.tick_top()
 ax.set_yticks(np.arange(mytestgrouped_categories_norm.shape[1]) + 1, minor=False)
 ax.set_xticks(np.arange(mytestgrouped_categories_norm.shape[0]) + 1, minor=False)
 plt.xticks(rotation=90)
 plt.rc('xtick', labelsize=10)
-plt.title('TripType',y=1.04)</code></p>
+plt.title('TripType',y=1.04)
+</code></pre>
 
 <p><img src="https://cloud.githubusercontent.com/assets/14279088/12152480/3357f490-b472-11e5-8738-3fb0179796f0.png"></p>
 
-<p>I also created bar graphs for each trip type to understand in more detail what was being purchased, for example Trip 4:
- <code>data = pd.read_csv("train.csv")
+<p>You can see many correlations between Trip Types and one or two very popular items. </p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12158162/a927eb40-b494-11e5-9647-6e27f102f4bf.png"></p>
+
+<p>I also created bar graphs for each trip type to explore these associations in more detail.</p>
+
+<pre><code>data = pd.read_csv("train.csv")
 type_6 = data[data.TripType == 6]
 type_6_items = type_6[["TripType","DepartmentDescription"]]
-type_6_items.DepartmentDescription.value_counts().head().plot(kind="bar", rot=45, 
-                                                              title="Type 6 Trips", color="midnightblue")</code>
-<img src="https://cloud.githubusercontent.com/assets/14279088/12152516/6d0369fe-b472-11e5-8c62-cccbcbaf3300.png"></p>
+type_6_items.DepartmentDescription.value_counts().head().plot(kind="bar", rot=45, `
+                                                         `title="Type 6 Trips", color="midnightblue")
+</code></pre>
 
-<p>I called this one the "Vices" Trip. I then labeled all 38 trips:</p>
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12152516/6d0369fe-b472-11e5-8c62-cccbcbaf3300.png"></p>
+
+<p>I discovered that the most important aspect of Walmart's classification were the types of items purchased, with many trips signifying a specific cause, from pet food to party items to men's clothes.</p>
+
+<p>I could even label many of the 38 trips for my own entertainment:</p>
 
 <p><img src="https://cloud.githubusercontent.com/assets/14279088/12152574/ac0b0918-b472-11e5-90d9-817d581e7995.png"></p>
 
-<p>Finally, I could tell a story about Walmart's transactional data. The most important aspect of their classification were the types of items purchased, with many trips signifying a trip for a specific cause, from pet food to party items to men's clothes. With this, I then went about creating the features, or columns, that my model would read.</p>
+<h3>
+<a id="feature-preparation" class="anchor" href="#feature-preparation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature Preparation</h3>
+
+<p>Creating useful data features for a model to learn from is perhaps the most important part of the data science process. Often, domain expertise can help this process. Based on my knowledge of the data, I created the following features, or variables, for each store visit:</p>
+
+<h4>
+<a id="numerical-weekday-variable" class="anchor" href="#numerical-weekday-variable" aria-hidden="true"><span class="octicon octicon-link"></span></a>Numerical Weekday Variable</h4>
+
+<pre><code>data['Weekday'] = data['Weekday'].map({"Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5,
+"Saturday": 6, "Sunday": 7})
+</code></pre>
+
+<h4>
+<a id="74-department-description-variables" class="anchor" href="#74-department-description-variables" aria-hidden="true"><span class="octicon octicon-link"></span></a>74 Department Description Variables</h4>
+
+<p>Then, I wanted to describe the purchased item in a numerical way. The best way would be to create a column for each of the Department Description types with the data being the amount purchased in that category per trip. Creating columns for every category of data in a column like 'DepartmentDescription' is called creating dummy variables for those values:</p>
+
+<pre><code>dummies = pd.get_dummies(data.DepartmentDescription)
+data[dummies.columns] = dummies
+</code></pre>
+
+<p>By default, dummy variables will contain boolean values (0 or 1, with 1 meaning the instance is true), but I instead wanted the values to represent the number of items purchased, so I multiplied the result by the Scan Count:</p>
+
+<pre><code>data_dummies = data_dummies.apply(lambda x: x*data["ScanCount"])
+</code></pre>
+
+<h4>
+<a id="return-variable" class="anchor" href="#return-variable" aria-hidden="true"><span class="octicon octicon-link"></span></a>Return Variable</h4>
+
+<p>I then created a new feature called Return - signifying whether there was a return with a 1 = a return and 0 = no return. </p>
+
+<pre><code>data.loc[data.ScanCount &lt; 0, 'Return'] = 1
+data.loc[data.Return != 1, 'Return'] = 0
+</code></pre>
+
+<h4>
+<a id="grouping-data" class="anchor" href="#grouping-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Grouping Data</h4>
+
+<p>Machine learning models are typically structured to make predictions or classifications on individual rows in a table. This presented a problem - each row in the Walmart data set represented a <strong>single item</strong>, not a <strong>complete store visit</strong>. As often comes up in data science, I needed to summarize many rows of items data into a single row that would encapsulate the meaning of a particular trip. I used Python's groupby function, and grouped some columns by their max value and others by summing the rows:</p>
+
+<pre><code>grouped_data = data.groupby("VisitNumber")
+grouped_data = grouped.agg({'Weekday': np.max, "TripType": np.max, 'NumItems': np.sum, 'Return': np.max, 
+          '1-HR PHOTO': np.sum, 'ACCESSORIES': np.sum, '(All Other Department Descriptions)': np.sum...})
+</code></pre>
+
+<p>The data now looked like this:</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12156873/cbbb2afa-b48a-11e5-95b3-a344b9337021.png"></p>
+
+<h4>
+<a id="category-counts" class="anchor" href="#category-counts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Category Counts</h4>
+
+<p>My next variable described the total number of unique Department purchases made on each trip. I thought this would be another important variable signifying whether this was an multi-purpose or singular purpose trip.</p>
+
+<pre><code>def add_category_counts(data):
+    alist = []
+    for array in np.asarray(data.iloc[:,4:]):
+        count = 0
+        for item in array:
+            if item &gt; 0:
+                count += 1
+        alist.append(count)
+    cat_counts = pd.DataFrame(alist)
+    cat_counts = cat_counts.rename(columns={0:"CategoryCount"})
+    cat_counts = cat_counts.set_index(data.index)
+    data.insert(4, 'CategoryCounts', cat_counts)
+    return data
+</code></pre>
+
+<h4>
+<a id="fineline-number-dummy-variables" class="anchor" href="#fineline-number-dummy-variables" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fineline Number Dummy Variables</h4>
+
+<p>Lastly, I created dummy variables for the most frequent Fineline numbers to limit the size of the dataframe. I later used all of the Fineline Numbers by creating a sparse matrix, a tool from the scikit-learn machine learning library that minimizes the memory required for a dataframe with a large amount of 0 values. The data was simply too large to use a pandas dataframe as before.  In all, I had a dataframe with around 90,000 rows x 5000 columns.</p>
 
 <h3>
-<a id="feature-creation" class="anchor" href="#feature-creation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature Creation</h3>
+<a id="modeling---applying-machine-learning-techniques" class="anchor" href="#modeling---applying-machine-learning-techniques" aria-hidden="true"><span class="octicon octicon-link"></span></a>Modeling - Applying Machine Learning Techniques</h3>
 
-<p>The data munging for this project was made a little bit complicated by how Walmart presented the data. Machine learning models are typically structured to make predictions or classifications on individual rows in a table. This presented a problem - each row in the Walmart data set represented a <strong>single item</strong>, not a <strong>complete store visit</strong>. As often comes up in data science, I needed to summarize many rows of items data into a single row that would encapsulate the meaning of a particular trip.</p>
+<p>I tried many different machine learning models throughout the process. I went through logistic regression, Naive Bayes, Random Forest, Extra Trees, and others before landing on the XGBoost library, which produced superior results. The XGBoost library creates multiple decision tree ensembles and averages the results, halting at the best fit. To see the code for the other models, please refer to the project's Github page.</p>
 
-<p>Working first on the initial dataset of purchased items, I numbered the days of the week 1-7 so my models could read them:
-<code>data['Weekday'] = data['Weekday'].map({"Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, 
-                                           "Saturday": 6, "Sunday": 7})</code>
-Then, I wanted to describe the purchased item in a numerical way. The best way would be to create a column for each of the Department Description types with the data being the amount purchased in that category per trip. Creating columns for every category of data in a column like 'DepartmentDescription' is called creating dummy variables for those values:
-<code>dummies = pd.get_dummies(data.DepartmentDescription)
-    data[dummies.columns] = dummies</code>
-By default, dummy variables will contain boolean values (0 or 1, with 1 meaning the instance is true), but I instead wanted the values to represent the number of items purchased, so I multiplied the result by the Scan Count:
-<code>data_dummies = data_dummies.apply(lambda x: x*data["ScanCount"])</code></p>
+<p>import xgboost as xgb
+   from sklearn.cross_validation import train_test_split
+   from sklearn.metrics import log_loss</p>
+
+<p>Before modeling, it is important to split your training data into a training set and a test set, the latter of which hides the answers from the model. This way, it is easy to see how the model performs before unleashing it on brand new data without answers.</p>
+
+<pre><code>mytrain, mytest = train_test_split(data, test_size = .4)
+</code></pre>
+
+<hr>
+
+<pre><code>dtrain = xgb.DMatrix(np.asarray(mytrain[features]), label = np.asarray(mytrain.TripType))
+dtest = xgb.DMatrix(np.asarray(mytest[features]), label = np.asarray(mytest.TripType))
+</code></pre>
+
+<h3>
+<a id="setting-paramaters" class="anchor" href="#setting-paramaters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setting Paramaters</h3>
+
+<p>The XGBoost library provides many customizable parameters to optimize the model for specific circumstances. For instance, it is possible to either output a single prediction for each visit or the probability of every trip type for that particular visit. Since Walmart was using a logloss score as its scoring metric, it was necessary to output the probability of each trip type.</p>
+
+<pre><code>num_round = 200
+param = {'objective': 'multi:softprob', 'num_class':38, 
+     'eval_metric': 'mlogloss', "max_delta_step": 5}
+watchlist = [(dtrain,'train'), (dtest, 'eval')]
+</code></pre>
+
+<h3>
+<a id="training-the-model" class="anchor" href="#training-the-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training the Model</h3>
+
+<p>XGBoost helps prevent overfitting with it's early_stopping_round parameter, which halts the model after it has not improved for more than x number of rounds. Training a model can take anywhere from a few seconds to multiple hours depending on the complexity of an ensemble and size of the data. These rounds usually took a couple minutes.</p>
+
+<pre><code>bst = xgb.train(param, dtrain, num_round, watchlist, 
+            early_stopping_rounds=3)
+</code></pre>
+
+<p>In this case, the model trained for 90 iterations before stopping at the 87th iteration. It's log loss was .847, which translated to an accuracy of 72% when taking the most probable Trip Type for each prediction set.
+<img src="https://cloud.githubusercontent.com/assets/14279088/12159371/e699cc64-b49e-11e5-8603-b50439b03265.png"></p>
+
+<h3>
+<a id="predicting-upon-test-data-and-formatting-data-to-csv-for-competition-submission" class="anchor" href="#predicting-upon-test-data-and-formatting-data-to-csv-for-competition-submission" aria-hidden="true"><span class="octicon octicon-link"></span></a>Predicting Upon Test Data and Formatting Data to CSV for Competition Submission</h3>
+
+<pre><code>test_predictions = lr.predict_proba(np.asarray(test_data[test_features]))
+
+def predictions_to_csv(test_predictions):
+    test_predictions = pd.DataFrame(test_predictions)
+    test_indexes = test.index
+    test_predictions.insert(0, 'VisitNumber', test_indexes)
+    return test_predictions.to_csv("submissions/fifth_fineline_xgb.csv", index=False)
+</code></pre>
+
+<h3>
+<a id="analyzing-results" class="anchor" href="#analyzing-results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Analyzing Results</h3>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12159470/b4e39f46-b49f-11e5-9588-739769db8f4e.png"></p>
+
+<p>As you can see below, machine learning models do much better predicting upon frequent occurrences, and struggle with classifications that are more rare. This is a well-known problem that can really only addressed by gathering more data.</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/14279088/12159474/b8b05376-b49f-11e5-816d-13c206616d17.png"></p>
+
+<p>I hope this has helped you better understand the machine learning process, and if you are interested, helps you compete in a Kaggle data science competition. You can see the current active competitions at kaggle.com!</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/kaslemr/Walmart_Kaggle_Competition">Walmart Kaggle Competition</a> is maintained by <a href="https://github.com/kaslemr">kaslemr</a>.</span>
